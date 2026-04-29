@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { PerformanceData } from '@/lib/performance/types'
+import { useI18n } from '@/locales/client'
 
 interface Props {
   data: PerformanceData | undefined
@@ -25,6 +26,8 @@ const money = (v: number) =>
 const pct = (v: number) => `${(v * 100).toFixed(2)}%`
 
 export function DrawdownPanel({ data, isLoading }: Props) {
+  const t = useI18n()
+
   if (isLoading) {
     return (
       <div className="grid gap-4">
@@ -45,11 +48,11 @@ export function DrawdownPanel({ data, isLoading }: Props) {
       {/* KPI row */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
         {[
-          { label: 'Max Drawdown', value: money(maxDrawdown), sub: pct(maxDrawdownPct), danger: true },
-          { label: 'Current Drawdown', value: money(currentDrawdown), sub: '', danger: currentDrawdown < 0 },
-          { label: 'Longest DD Period', value: `${Math.round(longestDrawdownDays)}d`, sub: '' },
-          { label: 'Peak Equity', value: money(data.drawdown.peakEquity), sub: '' },
-          { label: 'Recovery Factor', value: recoveryFactor.toFixed(2), sub: 'Net PnL / |Max DD|' },
+          { label: t('performance.drawdown.maxDrawdown'), value: money(maxDrawdown), sub: pct(maxDrawdownPct), danger: true },
+          { label: t('performance.drawdown.currentDrawdown'), value: money(currentDrawdown), sub: '', danger: currentDrawdown < 0 },
+          { label: t('performance.drawdown.longestDDPeriod'), value: `${Math.round(longestDrawdownDays)}d`, sub: '' },
+          { label: t('performance.drawdown.peakEquity'), value: money(data.drawdown.peakEquity), sub: '' },
+          { label: t('performance.drawdown.recoveryFactor'), value: recoveryFactor.toFixed(2), sub: t('performance.drawdown.recoveryFactorNote') },
         ].map(kpi => (
           <Card key={kpi.label}>
             <CardContent className="pt-4 pb-3">
@@ -66,7 +69,7 @@ export function DrawdownPanel({ data, isLoading }: Props) {
       {points.length === 0 && (
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground text-sm">
-            No trades in this period.
+            {t('performance.noTradesInPeriod')}
           </CardContent>
         </Card>
       )}
@@ -76,7 +79,7 @@ export function DrawdownPanel({ data, isLoading }: Props) {
           {/* Equity curve */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Equity Curve</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('performance.drawdown.equityCurve')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={260}>
@@ -91,7 +94,7 @@ export function DrawdownPanel({ data, isLoading }: Props) {
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                   <YAxis tickFormatter={money} tick={{ fontSize: 11 }} />
                   <ReferenceLine y={0} stroke="#6b7280" strokeDasharray="4 4" />
-                  <Tooltip formatter={(v: number) => money(v)} labelFormatter={l => `Date: ${l}`} />
+                  <Tooltip formatter={(v: number) => money(v)} labelFormatter={l => `${t('performance.date')}: ${l}`} />
                   <Area
                     type="monotone"
                     dataKey="equity"
@@ -108,7 +111,7 @@ export function DrawdownPanel({ data, isLoading }: Props) {
           {/* Drawdown curve */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Drawdown ($) from Peak</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('performance.drawdown.drawdownFromPeak')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -123,7 +126,7 @@ export function DrawdownPanel({ data, isLoading }: Props) {
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                   <YAxis tickFormatter={money} tick={{ fontSize: 11 }} />
                   <ReferenceLine y={0} stroke="#6b7280" />
-                  <Tooltip formatter={(v: number) => money(v)} labelFormatter={l => `Date: ${l}`} />
+                  <Tooltip formatter={(v: number) => money(v)} labelFormatter={l => `${t('performance.date')}: ${l}`} />
                   <Area
                     type="monotone"
                     dataKey="dd"
