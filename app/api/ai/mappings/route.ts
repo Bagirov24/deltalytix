@@ -1,12 +1,19 @@
 import { openai } from "@ai-sdk/openai";
-import { Output, streamObject, streamText } from "ai";
+import { Output, streamText } from "ai";
 import { NextRequest } from "next/server";
 import { mappingSchema } from "./schema";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
+// Rate limit: 20 mapping requests per IP per minute
+const AI_MAPPINGS_RATE_LIMIT = { limit: 20, windowMs: 60_000, prefix: 'ai:mappings' }
+
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(req, AI_MAPPINGS_RATE_LIMIT)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
     const body = await req.json();
     const { fieldColumns, firstRows } =
@@ -96,4 +103,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

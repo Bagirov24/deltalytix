@@ -3,8 +3,12 @@ import { streamObject } from "ai";
 import { NextRequest } from "next/server";
 import { tradeSchema } from "./schema";
 import { z } from 'zod/v3';
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 30;
+
+// Rate limit: 10 format-trades requests per IP per minute (expensive GPT-4o-mini call)
+const AI_FORMAT_TRADES_RATE_LIMIT = { limit: 10, windowMs: 60_000, prefix: 'ai:format-trades' }
 
 const requestSchema = z.object({
   headers: z.array(z.string()),
@@ -12,10 +16,12 @@ const requestSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(req, AI_FORMAT_TRADES_RATE_LIMIT)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
     const body = await req.json();
     const { headers, rows } = requestSchema.parse(body);
-console.log(headers, rows);
 
     const result = streamObject({
       model: openai("gpt-4o-mini-2024-07-18"),

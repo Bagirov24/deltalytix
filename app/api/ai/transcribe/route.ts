@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+// Rate limit: 10 transcription requests per IP per minute (Whisper is expensive)
+const AI_TRANSCRIBE_RATE_LIMIT = { limit: 10, windowMs: 60_000, prefix: 'ai:transcribe' }
+
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, AI_TRANSCRIBE_RATE_LIMIT)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
     const formData = await request.formData()
     const audioFile = formData.get('audio') as File
@@ -46,4 +53,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
