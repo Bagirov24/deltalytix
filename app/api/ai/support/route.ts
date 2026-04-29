@@ -1,10 +1,18 @@
 import { convertToModelMessages, streamText, UIMessage } from "ai";
+import { NextRequest } from "next/server";
 import { askForEmailForm } from "./tools/ask-for-email-form";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-export async function POST(req: Request) {
+// Rate limit: 30 support chat requests per IP per minute
+const AI_SUPPORT_RATE_LIMIT = { limit: 30, windowMs: 60_000, prefix: 'ai:support' }
+
+export async function POST(req: NextRequest) {
+  const rl = rateLimit(req, AI_SUPPORT_RATE_LIMIT)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
     const {
       messages,

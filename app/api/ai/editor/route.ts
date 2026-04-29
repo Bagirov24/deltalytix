@@ -5,8 +5,12 @@ import { openai } from "@ai-sdk/openai";
 import { getCurrentDayData } from "./tools/get-current-day-data";
 import { ActionSchema } from "./schema";
 import { getDayData } from "./tools/get-trading-summary";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 90;
+
+// Rate limit: 20 editor AI requests per IP per minute
+const AI_EDITOR_RATE_LIMIT = { limit: 20, windowMs: 60_000, prefix: 'ai:editor' }
 
 type EditorAction = z.infer<typeof ActionSchema>;
 
@@ -98,6 +102,9 @@ const getTools = (action: EditorAction) => {
 };
 
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(req, AI_EDITOR_RATE_LIMIT)
+  if (!rl.success) return rateLimitResponse(rl)
+
   console.log("POST request received");
   try {
     const body = await req.json();
