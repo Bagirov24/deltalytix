@@ -11,6 +11,7 @@ import {
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { resolveDateRange } from '@/lib/performance/date-utils'
 import type { PeriodRange, PeriodType } from '@/lib/performance/types'
+import { useI18n } from '@/locales/client'
 
 interface Props {
   value: PeriodRange
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function PeriodSelector({ value, onChange }: Props) {
+  const t = useI18n()
   const { label } = resolveDateRange(value)
 
   const setType = (type: PeriodType) => onChange({ type, offset: 0 })
@@ -32,10 +34,10 @@ export function PeriodSelector({ value, onChange }: Props) {
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="week">Week</SelectItem>
-          <SelectItem value="month">Month</SelectItem>
-          <SelectItem value="quarter">Quarter</SelectItem>
-          <SelectItem value="year">Year</SelectItem>
+          <SelectItem value="week">{t('performance.periodSelector.week')}</SelectItem>
+          <SelectItem value="month">{t('performance.periodSelector.month')}</SelectItem>
+          <SelectItem value="quarter">{t('performance.periodSelector.quarter')}</SelectItem>
+          <SelectItem value="year">{t('performance.periodSelector.year')}</SelectItem>
         </SelectContent>
       </Select>
 
