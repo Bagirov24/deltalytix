@@ -16,6 +16,24 @@ type Period = "week" | "month";
 const fmt = (v: number) =>
   v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
+/**
+ * Converts raw ISO key from getPeriodStats into a human-readable label.
+ *   month: "2025-01"    → "Jan 25"
+ *   week:  "2025-01-06" → "Jan 6"
+ */
+function formatLabel(label: string, period: Period): string {
+  if (period === "month") {
+    const [y, m] = label.split("-");
+    const d = new Date(Date.UTC(Number(y), Number(m) - 1, 1));
+    return d.toLocaleString("en-US", { month: "short", year: "2-digit", timeZone: "UTC" });
+    // e.g. "Jan 25"
+  }
+  // week: label is Monday of that week
+  const d = new Date(label + "T00:00:00Z");
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  // e.g. "Jan 6"
+}
+
 export function PeriodComparison({ trades }: { trades: FormattedTrade[] }) {
   const [period, setPeriod] = React.useState<Period>("month");
 
@@ -29,7 +47,7 @@ export function PeriodComparison({ trades }: { trades: FormattedTrade[] }) {
     const d = payload[0].payload;
     return (
       <div className="rounded-lg border bg-background p-2 shadow-xs text-xs">
-        <p className="font-semibold">{d.label}</p>
+        <p className="font-semibold">{formatLabel(d.label, period)}</p>
         <p>P&amp;L: <span className={cn("font-bold", d.pnl >= 0 ? "text-emerald-600" : "text-red-500")}>{fmt(d.pnl)}</span></p>
         <p>Trades: {d.trades}</p>
         <p>Win Rate: {d.winRate.toFixed(1)}%</p>
@@ -76,6 +94,7 @@ export function PeriodComparison({ trades }: { trades: FormattedTrade[] }) {
             <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
             <XAxis
               dataKey="label"
+              tickFormatter={(v) => formatLabel(v, period)}
               tick={{
                 fontSize: 9,
                 ...(rotateTicks ? { textAnchor: "end" } as object : {}),

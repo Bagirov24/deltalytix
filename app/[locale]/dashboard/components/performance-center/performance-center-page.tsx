@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useData } from "@/context/data-provider";
-import { useI18n } from "@/locales/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon, BarChart2 } from "lucide-react";
@@ -34,7 +33,6 @@ function EmptyState() {
 
 export function PerformanceCenterPage() {
   const { formattedTrades } = useData();
-  const t = useI18n();
 
   const trades = formattedTrades ?? [];
 

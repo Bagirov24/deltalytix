@@ -1,4 +1,4 @@
-import { parseISO, getHours } from "date-fns";
+import { parseISO } from "date-fns";
 
 export interface PerformanceMetrics {
   totalTrades: number;
@@ -100,7 +100,8 @@ export function computePerformanceMetrics(trades: FormattedTrade[]): Performance
 export function getWinRateByHour(trades: FormattedTrade[]) {
   const map = new Map<number, { wins: number; total: number; pnl: number }>();
   for (const t of trades) {
-    const h = getHours(parseISO(t.entryDate));
+    // Use UTC hours to be consistent with getWinRateByWeekday (which uses getUTCDay)
+    const h = parseISO(t.entryDate).getUTCHours();
     const prev = map.get(h) ?? { wins: 0, total: 0, pnl: 0 };
     map.set(h, {
       wins: prev.wins + (t.pnl > 0 ? 1 : 0),
