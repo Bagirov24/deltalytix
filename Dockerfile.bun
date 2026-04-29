@@ -15,7 +15,8 @@ RUN apt-get update && \
       libjpeg62-turbo \
       libpng16-16 \
       libgif7 \
-      librsvg2-2 && \
+      librsvg2-2 \
+      curl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -62,5 +63,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 EXPOSE 3000
+
+# Liveness probe: Next.js responds on /api/health (or falls back to the root)
+# --retry and --silent prevent noisy output in logs
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD curl -f -s http://localhost:3000/api/health || curl -f -s http://localhost:3000 || exit 1
 
 CMD ["bun", "./server.js"]
