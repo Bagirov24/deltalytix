@@ -5,7 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { usePerformanceData } from '@/hooks/use-performance-data'
 import { resolveDateRange, previousPeriod } from '@/lib/performance/date-utils'
-import type { PeriodRange, PeriodStats } from '@/lib/performance/types'
+import type { PeriodRange } from '@/lib/performance/types'
+import { useI18n } from '@/locales/client'
 
 interface Props {
   currentPeriod: PeriodRange
@@ -53,6 +54,7 @@ function StatRow({
 }
 
 export function PeriodComparison({ currentPeriod }: Props) {
+  const t = useI18n()
   const prevPeriod = previousPeriod(currentPeriod)
   const { data: curr, isLoading: currLoading } = usePerformanceData(currentPeriod)
   const { data: prev, isLoading: prevLoading } = usePerformanceData(prevPeriod)
@@ -85,18 +87,18 @@ export function PeriodComparison({ currentPeriod }: Props) {
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Period vs Period</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{t('performance.periodComparison.title')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <StatRow label="Total Trades"  current={c.trades}       previous={p.trades}       format={v => String(v)} />
-          <StatRow label="Win Rate"       current={c.winRate}      previous={p.winRate}      format={pct} />
-          <StatRow label="Total P&L"      current={c.totalPnl}     previous={p.totalPnl}     format={money} />
-          <StatRow label="Avg P&L / Trade" current={c.avgPnl}     previous={p.avgPnl}       format={money} />
-          <StatRow label="Profit Factor"  current={c.profitFactor} previous={p.profitFactor} format={v => v.toFixed(2)} />
-          <StatRow label="Avg R:R"        current={c.avgRR}        previous={p.avgRR}        format={v => v.toFixed(2)} />
-          <StatRow label="Max Drawdown"   current={c.maxDrawdown}  previous={p.maxDrawdown}  format={money} higherIsBetter={false} />
-          <StatRow label="Best Trade"     current={c.bestTrade}    previous={p.bestTrade}    format={money} />
-          <StatRow label="Worst Trade"    current={c.worstTrade}   previous={p.worstTrade}   format={money} higherIsBetter={false} />
+          <StatRow label={t('performance.periodComparison.totalTrades')}  current={c.trades}       previous={p.trades}       format={v => String(v)} />
+          <StatRow label={t('performance.periodComparison.winRate')}       current={c.winRate}      previous={p.winRate}      format={pct} />
+          <StatRow label={t('performance.periodComparison.totalPnl')}      current={c.totalPnl}     previous={p.totalPnl}     format={money} />
+          <StatRow label={t('performance.periodComparison.avgPnl')}        current={c.avgPnl}       previous={p.avgPnl}       format={money} />
+          <StatRow label={t('performance.periodComparison.profitFactor')}  current={c.profitFactor} previous={p.profitFactor} format={v => v.toFixed(2)} />
+          <StatRow label={t('performance.periodComparison.avgRR')}         current={c.avgRR}        previous={p.avgRR}        format={v => v.toFixed(2)} />
+          <StatRow label={t('performance.periodComparison.maxDrawdown')}   current={c.maxDrawdown}  previous={p.maxDrawdown}  format={money} higherIsBetter={false} />
+          <StatRow label={t('performance.periodComparison.bestTrade')}     current={c.bestTrade}    previous={p.bestTrade}    format={money} />
+          <StatRow label={t('performance.periodComparison.worstTrade')}    current={c.worstTrade}   previous={p.worstTrade}   format={money} higherIsBetter={false} />
         </CardContent>
       </Card>
     </div>
