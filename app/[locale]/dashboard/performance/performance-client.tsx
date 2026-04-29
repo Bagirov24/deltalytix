@@ -10,15 +10,17 @@ import { ExportButton } from '@/components/performance/export-button'
 import { usePerformanceData } from '@/hooks/use-performance-data'
 import { PeriodSelector } from '@/components/performance/period-selector'
 import type { PeriodRange } from '@/lib/performance/types'
+import { useI18n } from '@/locales/client'
 
 export function PerformanceCenterClient() {
+  const t = useI18n()
   const [period, setPeriod] = useState<PeriodRange>({ type: 'month', offset: 0 })
   const { data, isLoading, error } = usePerformanceData(period)
 
   if (error) {
     return (
       <div className="text-destructive text-sm p-4 border border-destructive/30 rounded-lg">
-        Failed to load performance data. Please try again.
+        {t('performance.error')}
       </div>
     )
   }
@@ -27,15 +29,15 @@ export function PerformanceCenterClient() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <PeriodSelector value={period} onChange={setPeriod} />
-        {data && <ExportButton data={data} period={period} />}
+        {data && <ExportButton data={data} />}
       </div>
 
       <Tabs defaultValue="winrate" className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="winrate">Win Rate</TabsTrigger>
-          <TabsTrigger value="maemfe">MAE / MFE</TabsTrigger>
-          <TabsTrigger value="drawdown">Drawdown</TabsTrigger>
-          <TabsTrigger value="comparison">Period Comparison</TabsTrigger>
+          <TabsTrigger value="winrate">{t('performance.tabs.winRate')}</TabsTrigger>
+          <TabsTrigger value="maemfe">{t('performance.tabs.maeMfe')}</TabsTrigger>
+          <TabsTrigger value="drawdown">{t('performance.tabs.drawdown')}</TabsTrigger>
+          <TabsTrigger value="comparison">{t('performance.tabs.comparison')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="winrate">
