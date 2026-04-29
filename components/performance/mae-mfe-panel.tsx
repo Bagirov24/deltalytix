@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { PerformanceData } from '@/lib/performance/types'
+import { useI18n } from '@/locales/client'
 
 interface Props {
   data: PerformanceData | undefined
@@ -25,6 +26,8 @@ const money = (v: number) =>
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`
 
 export function MaeMfePanel({ data, isLoading }: Props) {
+  const t = useI18n()
+
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
@@ -58,10 +61,10 @@ export function MaeMfePanel({ data, isLoading }: Props) {
       {/* KPI row */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         {[
-          { label: 'Avg MAE', value: money(avgMae), note: 'Max Adverse Excursion' },
-          { label: 'Avg MFE', value: money(avgMfe), note: 'Max Favorable Excursion' },
-          { label: 'Avg Efficiency', value: pct(avgEfficiency), note: 'PnL / MFE' },
-          { label: 'Avg R:R', value: avgRR.toFixed(2), note: 'Risk / Reward Ratio' },
+          { label: t('performance.maeMfe.avgMAE'), value: money(avgMae), note: t('performance.maeMfe.maxAdverseExcursion') },
+          { label: t('performance.maeMfe.avgMFE'), value: money(avgMfe), note: t('performance.maeMfe.maxFavorableExcursion') },
+          { label: t('performance.maeMfe.avgEfficiency'), value: pct(avgEfficiency), note: t('performance.maeMfe.pnlMfe') },
+          { label: t('performance.maeMfe.avgRR'), value: avgRR.toFixed(2), note: t('performance.maeMfe.riskRewardRatio') },
         ].map(kpi => (
           <Card key={kpi.label}>
             <CardContent className="pt-4 pb-3">
@@ -76,8 +79,8 @@ export function MaeMfePanel({ data, isLoading }: Props) {
       {points.length === 0 && (
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground text-sm">
-            No MAE/MFE data available for this period.<br />
-            <span className="text-xs">MAE/MFE requires Databento market data to be enabled.</span>
+            {t('performance.maeMfe.noData')}<br />
+            <span className="text-xs">{t('performance.maeMfe.noDataNote')}</span>
           </CardContent>
         </Card>
       )}
@@ -88,7 +91,7 @@ export function MaeMfePanel({ data, isLoading }: Props) {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                MAE vs MFE Scatter — each dot is one trade
+                {t('performance.maeMfe.scatterTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -97,19 +100,19 @@ export function MaeMfePanel({ data, isLoading }: Props) {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis
                     dataKey="x"
-                    name="MAE"
+                    name={t('performance.maeMfe.mae')}
                     type="number"
                     tickFormatter={money}
                     tick={{ fontSize: 11 }}
-                    label={{ value: 'MAE ($)', position: 'insideBottom', offset: -4, fontSize: 12 }}
+                    label={{ value: `${t('performance.maeMfe.mae')} ($)`, position: 'insideBottom', offset: -4, fontSize: 12 }}
                   />
                   <YAxis
                     dataKey="y"
-                    name="MFE"
+                    name={t('performance.maeMfe.mfe')}
                     type="number"
                     tickFormatter={money}
                     tick={{ fontSize: 11 }}
-                    label={{ value: 'MFE ($)', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                    label={{ value: `${t('performance.maeMfe.mfe')} ($)`, angle: -90, position: 'insideLeft', fontSize: 12 }}
                   />
                   <Tooltip
                     cursor={{ strokeDasharray: '3 3' }}
@@ -119,9 +122,9 @@ export function MaeMfePanel({ data, isLoading }: Props) {
                       return (
                         <div className="bg-background border rounded-lg shadow p-2 text-xs">
                           <p className="font-medium">{d.name}</p>
-                          <p>MAE: {money(d.x)}</p>
-                          <p>MFE: {money(d.y)}</p>
-                          <p>P&L: {money(d.pnl)}</p>
+                          <p>{t('performance.maeMfe.mae')}: {money(d.x)}</p>
+                          <p>{t('performance.maeMfe.mfe')}: {money(d.y)}</p>
+                          <p>{t('performance.maeMfe.pnl')}: {money(d.pnl)}</p>
                         </div>
                       )
                     }}
@@ -140,7 +143,7 @@ export function MaeMfePanel({ data, isLoading }: Props) {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Execution Efficiency — how much of the MFE was captured
+                {t('performance.maeMfe.efficiencyTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -149,19 +152,19 @@ export function MaeMfePanel({ data, isLoading }: Props) {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis
                     dataKey="x"
-                    name="MFE"
+                    name={t('performance.maeMfe.mfe')}
                     type="number"
                     tickFormatter={money}
                     tick={{ fontSize: 11 }}
-                    label={{ value: 'MFE ($)', position: 'insideBottom', offset: -4, fontSize: 12 }}
+                    label={{ value: `${t('performance.maeMfe.mfe')} ($)`, position: 'insideBottom', offset: -4, fontSize: 12 }}
                   />
                   <YAxis
                     dataKey="y"
-                    name="P&L"
+                    name={t('performance.maeMfe.pnl')}
                     type="number"
                     tickFormatter={money}
                     tick={{ fontSize: 11 }}
-                    label={{ value: 'P&L ($)', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                    label={{ value: `${t('performance.maeMfe.pnl')} ($)`, angle: -90, position: 'insideLeft', fontSize: 12 }}
                   />
                   <ReferenceLine stroke="#6b7280" strokeDasharray="4 4" segment={[{ x: 0, y: 0 }, { x: 10000, y: 10000 }]} />
                   <Tooltip
@@ -171,9 +174,9 @@ export function MaeMfePanel({ data, isLoading }: Props) {
                       return (
                         <div className="bg-background border rounded-lg shadow p-2 text-xs">
                           <p className="font-medium">{d.name}</p>
-                          <p>MFE: {money(d.x)}</p>
-                          <p>P&L: {money(d.y)}</p>
-                          <p>Efficiency: {pct(d.efficiency)}</p>
+                          <p>{t('performance.maeMfe.mfe')}: {money(d.x)}</p>
+                          <p>{t('performance.maeMfe.pnl')}: {money(d.y)}</p>
+                          <p>{t('performance.maeMfe.efficiency')}: {pct(d.efficiency)}</p>
                         </div>
                       )
                     }}
