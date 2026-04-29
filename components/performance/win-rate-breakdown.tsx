@@ -20,8 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import type { PerformanceData, WinRateByDimension } from '@/lib/performance/types'
+import { useI18n } from '@/locales/client'
 
 interface Props {
   data: PerformanceData | undefined
@@ -44,7 +44,12 @@ function WinRateBar({ value }: { value: number }) {
   )
 }
 
-function DimensionTable({ rows, title }: { rows: WinRateByDimension[]; title: string }) {
+function DimensionTable({ rows, title, noTradesLabel, tradesLabel }: {
+  rows: WinRateByDimension[]
+  title: string
+  noTradesLabel: string
+  tradesLabel: string
+}) {
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -55,7 +60,7 @@ function DimensionTable({ rows, title }: { rows: WinRateByDimension[]; title: st
           <TableHeader>
             <TableRow>
               <TableHead>{title}</TableHead>
-              <TableHead className="text-right">Trades</TableHead>
+              <TableHead className="text-right">{tradesLabel}</TableHead>
               <TableHead className="text-right">Win Rate</TableHead>
               <TableHead className="text-right">Avg P&L</TableHead>
               <TableHead className="text-right">Total P&L</TableHead>
@@ -65,7 +70,7 @@ function DimensionTable({ rows, title }: { rows: WinRateByDimension[]; title: st
             {rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  No trades in this period
+                  {noTradesLabel}
                 </TableCell>
               </TableRow>
             )}
@@ -100,6 +105,8 @@ function DimensionTable({ rows, title }: { rows: WinRateByDimension[]; title: st
 }
 
 export function WinRateBreakdown({ data, isLoading }: Props) {
+  const t = useI18n()
+
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
@@ -114,17 +121,15 @@ export function WinRateBreakdown({ data, isLoading }: Props) {
 
   const { overall, byInstrument, byWeekday, byHour, bySide } = data.winRate
 
-  const overallColor = overall.winRate >= 0.5 ? '#22c55e' : '#ef4444'
-
   return (
     <div className="space-y-6">
       {/* KPI row */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         {[
-          { label: 'Win Rate', value: pct(overall.winRate) },
-          { label: 'Total Trades', value: String(overall.trades) },
-          { label: 'Avg P&L', value: money(overall.avgPnl) },
-          { label: 'Total P&L', value: money(overall.totalPnl) },
+          { label: t('performance.winRate.winRate'), value: pct(overall.winRate) },
+          { label: t('performance.winRate.totalTrades'), value: String(overall.trades) },
+          { label: t('performance.winRate.avgPnl'), value: money(overall.avgPnl) },
+          { label: t('performance.winRate.totalPnl'), value: money(overall.totalPnl) },
         ].map(kpi => (
           <Card key={kpi.label}>
             <CardContent className="pt-4 pb-3">
@@ -138,7 +143,7 @@ export function WinRateBreakdown({ data, isLoading }: Props) {
       {/* Weekday bar chart */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Win Rate by Weekday</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{t('performance.winRate.byWeekday')}</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={200}>
@@ -160,7 +165,7 @@ export function WinRateBreakdown({ data, isLoading }: Props) {
       {/* Hour bar chart */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Win Rate by Hour of Entry</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{t('performance.winRate.byHour')}</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={200}>
@@ -181,8 +186,18 @@ export function WinRateBreakdown({ data, isLoading }: Props) {
 
       {/* Tables */}
       <div className="grid gap-4 md:grid-cols-2">
-        <DimensionTable rows={byInstrument} title="Instrument" />
-        <DimensionTable rows={bySide} title="Side (Long / Short)" />
+        <DimensionTable
+          rows={byInstrument}
+          title={t('performance.instrument')}
+          noTradesLabel={t('performance.winRate.noTrades')}
+          tradesLabel={t('performance.winRate.trades')}
+        />
+        <DimensionTable
+          rows={bySide}
+          title={t('performance.side')}
+          noTradesLabel={t('performance.winRate.noTrades')}
+          tradesLabel={t('performance.winRate.trades')}
+        />
       </div>
     </div>
   )
