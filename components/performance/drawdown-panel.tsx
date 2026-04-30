@@ -45,8 +45,8 @@ export function DrawdownPanel({ data, isLoading }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* KPI row */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
+      {/* KPI row — 2 cols on mobile, 3 on sm, 5 on md+ so all 5 cards sit in one row */}
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
         {[
           { label: t('performance.drawdown.maxDrawdown'), value: money(maxDrawdown), sub: pct(maxDrawdownPct), danger: true },
           { label: t('performance.drawdown.currentDrawdown'), value: money(currentDrawdown), sub: '', danger: currentDrawdown < 0 },
