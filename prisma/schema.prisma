@@ -15,8 +15,8 @@ model Trade {
   entryId           String?  @default("")
   closeId           String?  @default("")
   instrument        String
-  entryPrice        String
-  closePrice        String
+  entryPrice        Float
+  closePrice        Float
   entryDate         String
   closeDate         String
   pnl               Float
