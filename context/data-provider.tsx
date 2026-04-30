@@ -548,7 +548,8 @@ export const DataProvider: React.FC<{
     params?.slug,
     timezone,
     supabaseUser,
-    isLoading,
+    // FIX #3: removed isLoading from deps — it was causing loadData to be
+    // recreated on every loading state change, leading to unstable references.
     setIsLoading,
   ]);
 
@@ -925,7 +926,9 @@ export const DataProvider: React.FC<{
     hourFilter,
     tagFilter,
     timezone,
-    isLoading,
+    // FIX #2: removed isLoading from deps — isLoading does not affect filtering
+    // logic and its presence was causing an expensive full recompute on every
+    // refresh start/end (twice per data load).
   ]);
 
   const statistics = useMemo(() => {
@@ -1215,7 +1218,7 @@ export const DataProvider: React.FC<{
   const deleteGroup = useCallback(
     async (groupId: string) => {
       try {
-        // Remove groupdId from accounts
+        // Remove groupId from accounts
         const updatedAccounts = accounts.map((account: Account) => {
           if (account.groupId === groupId) {
             return { ...account, groupId: null };
@@ -1223,6 +1226,8 @@ export const DataProvider: React.FC<{
           return account;
         });
         setAccounts(updatedAccounts);
+        // FIX #4: groups and setGroups were missing from deps, causing a stale
+        // closure bug where deleteGroup would operate on outdated groups state.
         setGroups(groups.filter((group) => group.id !== groupId));
         await deleteGroupAction(groupId);
       } catch (error) {
@@ -1230,7 +1235,7 @@ export const DataProvider: React.FC<{
         throw error;
       }
     },
-    [accounts, setAccounts]
+    [accounts, setAccounts, groups, setGroups]
   );
 
 
@@ -1453,11 +1458,14 @@ export const DataProvider: React.FC<{
   const groupTrades = useCallback(
     async (tradeIds: string[]) => {
       if (!supabaseUser?.id) return;
+      // FIX #1: was applying groupId to ALL trades unconditionally.
+      // Now only trades whose id is in tradeIds receive the new groupId.
       setTrades(
-        trades.map((trade) => ({
-          ...trade,
-          groupId: tradeIds[0],
-        }))
+        trades.map((trade) =>
+          tradeIds.includes(trade.id)
+            ? { ...trade, groupId: tradeIds[0] }
+            : trade
+        )
       );
       await groupTradesAction(tradeIds);
     },
@@ -1467,11 +1475,12 @@ export const DataProvider: React.FC<{
   const ungroupTrades = useCallback(
     async (tradeIds: string[]) => {
       if (!supabaseUser?.id) return;
+      // FIX #1 (same pattern): was clearing groupId on ALL trades.
+      // Now only trades whose id is in tradeIds have groupId set to null.
       setTrades(
-        trades.map((trade) => ({
-          ...trade,
-          groupId: null,
-        }))
+        trades.map((trade) =>
+          tradeIds.includes(trade.id) ? { ...trade, groupId: null } : trade
+        )
       );
       await ungroupTradesAction(tradeIds);
     },
@@ -1609,4 +1618,3 @@ export const useData = () => {
   }
   return context;
 };
-
